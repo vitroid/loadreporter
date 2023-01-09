@@ -5,7 +5,7 @@ After = network.target
 [Service]
 Type = simple
 ExecStart = /usr/local/bin/loadreporter
-User = systemd
+User = root
 Restart = on-failure
 SyslogIdentifier = loadreporter
 RestartSec = 5

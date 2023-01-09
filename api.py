@@ -115,7 +115,7 @@ async def load_info() -> str:
 
 
 def main():
-    uvicorn.run("api:app", host="0.0.0.0", reload=True, port=int(os.environ.get("PORT", 8086)) )
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8086)) )
 
 
 if __name__ == "__main__":
