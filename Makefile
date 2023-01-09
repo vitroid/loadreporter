@@ -1,4 +1,4 @@
 install:
 	sudo install avahi/loadreporter.service /etc/avahi/services/
 	sudo install systemctl/loadreporter.service /etc/systemd/system
-	sudo python setup.py install
+	sudo pip3 install -e . # git+git://github.com/vitroid/loadreporter.git@main
