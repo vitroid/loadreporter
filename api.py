@@ -3,6 +3,7 @@ import json
 import os
 import os.path
 import re
+import subprocess
 
 import uvicorn
 from fastapi import FastAPI
@@ -51,8 +52,9 @@ def get_spec():
 
 def gpu_info():
     try:
-        with os.popen("nvidia-smi -L") as pipe:
-            return pipe.readlines()
+        with subprocess.Popen(["nvidia-smi", "-L"]) as pipe:
+            lines = pipe.stdout.readlines()
+            return lines
     except:
         return []
 
