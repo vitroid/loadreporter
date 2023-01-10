@@ -1,5 +1,4 @@
 #/usr/bin/env python3
-import json
 import os
 import os.path
 import re
@@ -52,7 +51,7 @@ def get_spec():
 
 def gpu_info():
     try:
-        with subprocess.Popen(["nvidia-smi", "-L"]) as pipe:
+        with subprocess.Popen(["nvidia-smi", "-L"], encoding="utf-8", stdout=subprocess.PIPE) as pipe:
             lines = pipe.stdout.readlines()
             return lines
     except:
