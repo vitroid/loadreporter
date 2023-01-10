@@ -49,6 +49,14 @@ def get_spec():
         return {}
 
 
+def gpu_info():
+    try:
+        with os.popen(" vidia-smi -L") as pipe:
+            return pipe.readlines()
+    except:
+        return []
+
+
 def loadavg():
     with open("/proc/loadavg") as f:
         return float(f.readline().split()[0])
@@ -58,6 +66,7 @@ def info():
     output = get_spec()
     output["load"] = loadavg()
     output["ostype"] = ostype()
+    output["gpu"] = gpu_info()
     return output
 
 

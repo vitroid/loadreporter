@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-zeroconf = "*"
 fastapi = "*"
 uvicorn = "*"
 
