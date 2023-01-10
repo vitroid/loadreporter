@@ -52,7 +52,7 @@ def get_spec():
 
 def gpu_info():
     try:
-        with subprocess.Popen(["nvidia-smi", "-L"]) as pipe:
+        with subprocess.Popen(["nvidia-smi", "-L"], encoding="utf-8", stdout=subprocess.PIPE) as pipe:
             lines = pipe.stdout.readlines()
             return lines
     except:
@@ -91,7 +91,6 @@ app.mount(f"/v{__api_version__}", api)
 #     allow_methods=["*"],
 #     allow_headers=["*"],
 # )
-
 
 @api.get("/info")
 async def load_info():
