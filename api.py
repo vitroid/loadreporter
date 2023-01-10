@@ -6,6 +6,7 @@ import re
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 # import time
@@ -58,7 +59,8 @@ def info():
     output["load"] = loadavg()
     output["ostype"] = ostype()
     print(output)
-    return json.dumps(output)
+    # return json.dumps(output)
+    return output
 
 
 
@@ -110,8 +112,9 @@ app.mount(f"/v{__api_version__}", api)
 
 
 @api.get("/info")
-async def load_info() -> str:
+async def load_info():
     return info()
+    return JSONResponse(content=info())
 
 
 def main():
