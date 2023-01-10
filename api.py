@@ -51,7 +51,7 @@ def get_spec():
 
 def gpu_info():
     try:
-        with os.popen(" vidia-smi -L") as pipe:
+        with os.popen("nvidia-smi -L") as pipe:
             return pipe.readlines()
     except:
         return []
