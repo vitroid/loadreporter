@@ -58,8 +58,6 @@ def info():
     output = get_spec()
     output["load"] = loadavg()
     output["ostype"] = ostype()
-    print(output)
-    # return json.dumps(output)
     return output
 
 
@@ -67,34 +65,7 @@ def info():
 app = FastAPI()
 api = FastAPI(root_path=f"/v{__api_version__}")
 app.mount(f"/v{__api_version__}", api)
-# app.mount("/", StaticFiles(directory="../loadmeters/public", html=True), name="static")
 
-
-
-# @app.on_event("startup")
-# @repeat_every(seconds=15)  # 15 seconds
-# def update_history() -> None:
-#     fn = "history.json"
-#     try:
-#         with open(fn) as f:
-#             history = json.load(f)
-#     except:
-#         history = {}
-#     with os.popen("ruptime -a","r") as pipe:
-#         for line in pipe:
-#             columns = line.split()
-#             server = columns[0]
-#             if len(columns) == 9:
-#                 load = float(columns[-3].strip(","))
-#             else:
-#                 load = -1
-#             if server not in history:
-#                 history[server] = []
-#             history[server].append(load)
-#             if len(history[server]) > 60:
-#                 del history[server][0]
-#     with open(fn, "w") as f:
-#         json.dump(history, f, indent=4)
 
 
 # origins = [
