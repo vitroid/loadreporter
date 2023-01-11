@@ -53,7 +53,12 @@ def get_spec():
 def gpu_info():
     try:
         with subprocess.Popen(["nvidia-smi", "-L"], encoding="utf-8", stdout=subprocess.PIPE) as pipe:
-            lines = pipe.stdout.readlines()
+            lines = []
+            for line in pipe.stdout.readlines():
+                p = line.find("(")
+                if p >= 0:
+                    line = line[:p]
+                lines.append(line.strip())
             return lines
     except:
         return []
