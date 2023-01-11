@@ -63,6 +63,27 @@ def gpu_info():
         return []
 
 
+def cpu_usage(cores):
+    try:
+        usage = {}
+        with subprocess.Popen(["top", "-b", "-n", "1"], encoding="utf-8", stdout=subprocess.PIPE) as pipe:
+            for line in pipe.stdout.readlines():
+                cols = line.split()
+                try:
+                    pid = int(cols[0])
+                    user = cols[1]
+                    load = int(cols[8])
+                    if user not in usage:
+                        usage[user] = 0
+                    usage[user] += load
+                except:
+                    pass
+        # 5%以上使っているユーザだけ
+        return {user:load for user, load in usage.items() if load > cores*5 }
+    except:
+        return dict()
+
+
 def loadavg():
     with open("/proc/loadavg") as f:
         return float(f.readline().split()[0])
@@ -73,6 +94,7 @@ def info():
     output["load"] = loadavg()
     output["ostype"] = ostype()
     output["gpu"] = gpu_info()
+    output["usage"] = cpu_usage(output["cores"])
     return output
 
 
@@ -82,7 +104,7 @@ api = FastAPI(root_path=f"/v{__api_version__}")
 app.mount(f"/v{__api_version__}", api)
 
 
-
+print(cpu_usage(96))
 # origins = [
 #     "*",
 #     "http://localhost:8080",
