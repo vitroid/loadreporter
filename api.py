@@ -72,7 +72,7 @@ def cpu_usage(cores):
                 try:
                     pid = int(cols[0])
                     user = cols[1]
-                    load = int(cols[8])
+                    load = float(cols[8])
                     if user not in usage:
                         usage[user] = 0
                     usage[user] += load
