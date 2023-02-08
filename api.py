@@ -8,7 +8,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-
+import time
+import numpy
 # import time
 
 
@@ -29,6 +30,18 @@ def ostype():
     except:
         with open("/etc/system-release") as f:
             return f.readline().strip()
+
+
+def flops():
+    n = 1000
+    # https://bnikolic.co.uk/blog/python/flops/2019/09/27/python-counting-events.html
+    # estimated number of floating instructions in FFT
+    x = 4*numpy.log(n**2)*n**2-6*n**2 + 8
+    aa=numpy.mgrid[0:n:1,0:n:1][0]
+    now = time.perf_counter()
+    a=numpy.fft.fft(aa)
+    delta = time.perf_counter() - now
+    return x / delta
 
 
 def get_spec():
@@ -94,6 +107,7 @@ def info():
     output["load"] = loadavg()
     output["ostype"] = ostype()
     output["gpu"] = gpu_info()
+    output["GFlops"] = flops() / 1e9
     output["usage"] = cpu_usage(output["cores"])
     return output
 
@@ -121,7 +135,6 @@ print(cpu_usage(96))
 @api.get("/info")
 async def load_info():
     return info()
-    return JSONResponse(content=info())
 
 
 def main():
