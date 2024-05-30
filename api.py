@@ -62,6 +62,22 @@ def get_spec():
         return {}
 
 
+def mem_info():
+    """
+    for a linuxy system
+    """
+    try:
+        with open("/proc/meminfo") as f:
+            lines = [line for line in f if line.find("MemTotal") == 0]
+            # should be one line
+            memtotal = float(lines[0].split()[1].strip())*1024 # kB to B
+            return {
+                "memory": memtotal,
+            }
+    except:
+        return {}
+
+
 def gpu_info():
     try:
         with subprocess.Popen(["nvidia-smi", "-L"], encoding="utf-8", stdout=subprocess.PIPE) as pipe:
@@ -107,6 +123,7 @@ def info():
     output["load"] = loadavg()
     output["ostype"] = ostype()
     output["gpu"] = gpu_info()
+    output["memory"] = mem_info()
     output["GFlops"] = flops() / 1e9
     output["usage"] = cpu_usage(output["cores"])
     return output
@@ -118,7 +135,6 @@ api = FastAPI(root_path=f"/v{__api_version__}")
 app.mount(f"/v{__api_version__}", api)
 
 
-print(cpu_usage(96))
 # origins = [
 #     "*",
 #     "http://localhost:8080",
