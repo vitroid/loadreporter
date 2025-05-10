@@ -1,0 +1,14 @@
+[Unit]
+Description=Load Reporter API Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/loadreporter
+Restart=always
+RestartSec=10
+Environment=PORT=8086
+
+[Install]
+WantedBy=multi-user.target

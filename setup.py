@@ -1,9 +1,10 @@
 #!/usr/local/bin/python3
 
 from setuptools import setup
+import os
 
 setup(name='LoadReporter',
-      version='0.1',
+      version='0.2',
       description='Generate a long image strip from a train video',
       long_description=open('README.md', encoding='utf-8_sig').read(),
       long_description_content_type="text/markdown",
@@ -12,6 +13,8 @@ setup(name='LoadReporter',
         "Intended Audience :: Developers",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.8",
+        "Operating System :: POSIX :: Linux",
+        "Environment :: No Input/Output (Daemon)",
         ],
       author='Masakazu Matsumoto',
       author_email='vitroid@gmail.com',
@@ -27,5 +30,10 @@ setup(name='LoadReporter',
                   'loadreporter        = api:main',
               ]
           },
-       include_package_data=True,
+      data_files=[
+          ('/etc/systemd/system', ['systemctl/loadreporter.service']),
+          ('/etc/avahi/services', ['avahi/loadreporter.service']),
+      ],
+      include_package_data=True,
+      python_requires='>=3.8',
       )
