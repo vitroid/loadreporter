@@ -111,13 +111,26 @@ def post_install():
     
     print("Post-installation completed successfully!")
 
+# エントリーポイントスクリプトのテンプレート
+ENTRY_POINT_TEMPLATE = """#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+import re
+import sys
+from loadreporter.api import main
+
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
+"""
+
 setup(
     name='loadreporter',
     version='0.1.0',
     description='計算機負荷をzeroconfで提供するデーモン',
     author='Masakazu Matsumoto',
     author_email='vitroid@gmail.com',
-    packages=find_packages(),
+    packages=['loadreporter'],
+    package_dir={'loadreporter': 'loadreporter'},
     install_requires=[
         'zeroconf',
         'fastapi',
