@@ -17,7 +17,8 @@ def post_install():
         location = '/usr/local/lib/python3/dist-packages'
     
     # systemdサービスファイルの作成
-    with open('systemctl/loadreporter.tmpl') as f:
+    template_path = os.path.join(location, 'loadreporter-0.1.0.data/data/etc/systemd/system/loadreporter.tmpl')
+    with open(template_path) as f:
         template = f.read()
     service_content = template.replace('LOADREPORTER_PATH', os.path.join(location, 'bin/loadreporter'))
     
@@ -27,9 +28,10 @@ def post_install():
         f.write(service_content)
     
     # avahiサービスファイルのインストール
-    os.makedirs('/etc/avahi/services', exist_ok=True)
-    with open('avahi/loadreporter.service') as f:
+    avahi_path = os.path.join(location, 'loadreporter-0.1.0.data/data/etc/avahi/services/loadreporter.service')
+    with open(avahi_path) as f:
         avahi_content = f.read()
+    os.makedirs('/etc/avahi/services', exist_ok=True)
     with open('/etc/avahi/services/loadreporter.service', 'w') as f:
         f.write(avahi_content)
     
@@ -56,11 +58,15 @@ setup(
             'loadreporter=api:main',
         ],
     },
+    package_data={
+        '': ['api.py'],
+    },
     data_files=[
         ('/etc/systemd/system', ['systemctl/loadreporter.tmpl']),
         ('/etc/avahi/services', ['avahi/loadreporter.service']),
     ],
     python_requires='>=3.8',
+    include_package_data=True,
 )
 
 # インストール後に実行
