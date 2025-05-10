@@ -130,7 +130,6 @@ setup(
     author='Masakazu Matsumoto',
     author_email='vitroid@gmail.com',
     packages=['loadreporter'],
-    package_dir={'loadreporter': 'loadreporter'},
     install_requires=[
         'zeroconf',
         'fastapi',
