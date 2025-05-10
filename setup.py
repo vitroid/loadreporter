@@ -5,6 +5,35 @@ import os
 import subprocess
 import sys
 
+# systemdサービスファイルのテンプレート
+SYSTEMD_TEMPLATE = """[Unit]
+Description=Load Reporter API Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=LOADREPORTER_PATH
+Restart=always
+RestartSec=10
+Environment=PORT=8086
+
+[Install]
+WantedBy=multi-user.target
+"""
+
+# avahiサービスファイルの内容
+AVAHI_SERVICE = """<?xml version="1.0" standalone='no'?>
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+  <name replace-wildcards="yes">Load Reporter</name>
+  <service>
+    <type>_http._tcp</type>
+    <port>8086</port>
+  </service>
+</service-group>
+"""
+
 def post_install():
     """Post-installation script"""
     # バイナリのパスを取得
@@ -17,10 +46,7 @@ def post_install():
         location = '/usr/local/lib/python3/dist-packages'
     
     # systemdサービスファイルの作成
-    template_path = os.path.join(location, 'loadreporter-0.1.0.data/data/etc/systemd/system/loadreporter.tmpl')
-    with open(template_path) as f:
-        template = f.read()
-    service_content = template.replace('LOADREPORTER_PATH', os.path.join(location, 'bin/loadreporter'))
+    service_content = SYSTEMD_TEMPLATE.replace('LOADREPORTER_PATH', os.path.join(location, 'bin/loadreporter'))
     
     # サービスファイルのインストール
     os.makedirs('/etc/systemd/system', exist_ok=True)
@@ -28,12 +54,9 @@ def post_install():
         f.write(service_content)
     
     # avahiサービスファイルのインストール
-    avahi_path = os.path.join(location, 'loadreporter-0.1.0.data/data/etc/avahi/services/loadreporter.service')
-    with open(avahi_path) as f:
-        avahi_content = f.read()
     os.makedirs('/etc/avahi/services', exist_ok=True)
     with open('/etc/avahi/services/loadreporter.service', 'w') as f:
-        f.write(avahi_content)
+        f.write(AVAHI_SERVICE)
     
     # サービスの有効化と起動
     subprocess.run(['systemctl', 'daemon-reload'])
@@ -61,10 +84,6 @@ setup(
     package_data={
         '': ['api.py'],
     },
-    data_files=[
-        ('/etc/systemd/system', ['systemctl/loadreporter.tmpl']),
-        ('/etc/avahi/services', ['avahi/loadreporter.service']),
-    ],
     python_requires='>=3.8',
     include_package_data=True,
 )
