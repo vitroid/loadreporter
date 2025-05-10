@@ -29,7 +29,11 @@ deploy:
 	@echo "Building package..."
 	poetry build
 	@echo "Uploading to PyPI..."
-	poetry publish
+	@if [ -z "$$POETRY_PYPI_TOKEN_PYPI" ]; then \
+		echo "Note: POETRY_PYPI_TOKEN_PYPI environment variable is not set."; \
+		echo "You will be prompted for PyPI credentials."; \
+	fi
+	poetry publish --build
 	@echo "Creating git tag..."
 	@version=$$(poetry version -s); \
 	git tag -a "v$$version" -m "Release version $$version"; \
