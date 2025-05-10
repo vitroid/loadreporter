@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from setuptools import setup
+from setuptools import setup, find_packages
 import os
 import subprocess
 import sys
@@ -34,34 +34,82 @@ AVAHI_SERVICE = """<?xml version="1.0" standalone='no'?>
 </service-group>
 """
 
+def run_command(cmd, error_msg):
+    """コマンドを実行し、エラーがあればメッセージを表示"""
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"Error: {error_msg}")
+            print(f"Command: {' '.join(cmd)}")
+            print(f"Output: {result.stdout}")
+            print(f"Error: {result.stderr}")
+            return False
+        return True
+    except Exception as e:
+        print(f"Error: {error_msg}")
+        print(f"Exception: {str(e)}")
+        return False
+
 def post_install():
     """Post-installation script"""
+    print("Starting post-installation process...")
+    
     # バイナリのパスを取得
-    binary_path = subprocess.check_output([sys.executable, '-m', 'pip', 'show', 'loadreporter']).decode()
-    for line in binary_path.split('\n'):
-        if line.startswith('Location:'):
-            location = line.split(':')[1].strip()
-            break
-    else:
-        location = '/usr/local/lib/python3/dist-packages'
+    try:
+        binary_path = subprocess.check_output([sys.executable, '-m', 'pip', 'show', 'loadreporter']).decode()
+        for line in binary_path.split('\n'):
+            if line.startswith('Location:'):
+                location = line.split(':')[1].strip()
+                break
+        else:
+            location = '/usr/local/lib/python3/dist-packages'
+        print(f"Package location: {location}")
+    except Exception as e:
+        print(f"Error getting package location: {str(e)}")
+        return
     
     # systemdサービスファイルの作成
     service_content = SYSTEMD_TEMPLATE.replace('LOADREPORTER_PATH', os.path.join(location, 'bin/loadreporter'))
+    print(f"Service file content:\n{service_content}")
     
     # サービスファイルのインストール
-    os.makedirs('/etc/systemd/system', exist_ok=True)
-    with open('/etc/systemd/system/loadreporter.service', 'w') as f:
-        f.write(service_content)
+    try:
+        os.makedirs('/etc/systemd/system', exist_ok=True)
+        with open('/etc/systemd/system/loadreporter.service', 'w') as f:
+            f.write(service_content)
+        print("Service file installed successfully")
+    except Exception as e:
+        print(f"Error installing service file: {str(e)}")
+        return
     
     # avahiサービスファイルのインストール
-    os.makedirs('/etc/avahi/services', exist_ok=True)
-    with open('/etc/avahi/services/loadreporter.service', 'w') as f:
-        f.write(AVAHI_SERVICE)
+    try:
+        os.makedirs('/etc/avahi/services', exist_ok=True)
+        with open('/etc/avahi/services/loadreporter.service', 'w') as f:
+            f.write(AVAHI_SERVICE)
+        print("Avahi service file installed successfully")
+    except Exception as e:
+        print(f"Error installing avahi service file: {str(e)}")
+        return
     
     # サービスの有効化と起動
-    subprocess.run(['systemctl', 'daemon-reload'])
-    subprocess.run(['systemctl', 'enable', 'loadreporter'])
-    subprocess.run(['systemctl', 'start', 'loadreporter'])
+    if not run_command(['systemctl', 'daemon-reload'], "Failed to reload systemd"):
+        return
+    print("Systemd daemon reloaded")
+    
+    if not run_command(['systemctl', 'enable', 'loadreporter'], "Failed to enable service"):
+        return
+    print("Service enabled")
+    
+    if not run_command(['systemctl', 'start', 'loadreporter'], "Failed to start service"):
+        return
+    print("Service started")
+    
+    # サービスの状態を確認
+    if not run_command(['systemctl', 'status', 'loadreporter'], "Failed to get service status"):
+        return
+    
+    print("Post-installation completed successfully!")
 
 setup(
     name='loadreporter',
@@ -69,7 +117,7 @@ setup(
     description='計算機負荷をzeroconfで提供するデーモン',
     author='Masakazu Matsumoto',
     author_email='vitroid@gmail.com',
-    packages=[],
+    packages=find_packages(),
     install_requires=[
         'zeroconf',
         'fastapi',
@@ -78,14 +126,10 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'loadreporter=api:main',
+            'loadreporter=loadreporter.api:main',
         ],
     },
-    package_data={
-        '': ['api.py'],
-    },
     python_requires='>=3.8',
-    include_package_data=True,
 )
 
 # インストール後に実行
