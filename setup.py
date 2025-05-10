@@ -141,7 +141,7 @@ setup(
             'loadreporter=loadreporter.api:main',
         ],
     },
-    python_requires='>=3.8',
+    python_requires='>=3.6',
 )
 
 # インストール後に実行
