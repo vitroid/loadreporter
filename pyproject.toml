@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "計算機負荷をzeroconfで提供するデーモン"
 authors = ["Masakazu Matsumoto <vitroid@gmail.com>"]
 readme = "README.md"
-packages = []
+packages = [
+    { include = "api.py" }
+]
 license = "MIT"
 classifiers = [
     "Development Status :: 4 - Beta",
