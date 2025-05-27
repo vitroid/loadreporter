@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Command
 import os
 import subprocess
 import sys
@@ -125,6 +125,15 @@ if __name__ == '__main__':
     sys.exit(main())
 """
 
+class PostInstallCommand(Command):
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        post_install()
+
 setup(
     name='loadreporter',
     version='0.1.1',
@@ -144,8 +153,7 @@ setup(
         ],
     },
     python_requires='>=3.6',
-)
-
-# インストール後に実行
-if 'install' in sys.argv:
-    post_install() 
+    cmdclass={
+        'post_install': PostInstallCommand,
+    },
+) 
