@@ -136,7 +136,7 @@ class PostInstallCommand(Command):
 
 setup(
     name='loadreporter',
-    version='0.1.1',
+    version='0.1.2',
     description='計算機負荷をzeroconfで提供するデーモン',
     author='Masakazu Matsumoto',
     author_email='vitroid@gmail.com',
