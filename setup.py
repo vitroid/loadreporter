@@ -56,60 +56,62 @@ def post_install():
     
     # バイナリのパスを取得
     try:
-        binary_path = subprocess.check_output([sys.executable, '-m', 'pip', 'show', 'loadreporter']).decode()
-        for line in binary_path.split('\n'):
-            if line.startswith('Location:'):
-                location = line.split(':')[1].strip()
-                break
-        else:
-            location = '/usr/local/lib/python3/dist-packages'
-        print(f"Package location: {location}")
+        binary_path = subprocess.check_output(['which', 'loadreporter']).decode().strip()
+        if not binary_path:
+            print("Error: loadreporter binary not found")
+            return
+        print(f"Binary path: {binary_path}")
     except Exception as e:
-        print(f"Error getting package location: {str(e)}")
+        print(f"Error getting binary path: {str(e)}")
         return
     
     # systemdサービスファイルの作成
-    service_content = SYSTEMD_TEMPLATE.replace('LOADREPORTER_PATH', os.path.join(location, 'bin/loadreporter'))
-    print(f"Service file content:\n{service_content}")
+    service_content = SYSTEMD_TEMPLATE.replace('LOADREPORTER_PATH', binary_path)
     
     # サービスファイルのインストール
     try:
+        if os.geteuid() != 0:
+            print("Warning: This script needs to be run as root to install system services")
+            print("Please run the following commands manually:")
+            print(f"sudo bash -c 'echo \"{service_content}\" > /etc/systemd/system/loadreporter.service'")
+            print(f"sudo bash -c 'echo \"{AVAHI_SERVICE}\" > /etc/avahi/services/loadreporter.service'")
+            print("sudo systemctl daemon-reload")
+            print("sudo systemctl enable loadreporter")
+            print("sudo systemctl start loadreporter")
+            return
+            
         os.makedirs('/etc/systemd/system', exist_ok=True)
         with open('/etc/systemd/system/loadreporter.service', 'w') as f:
             f.write(service_content)
         print("Service file installed successfully")
-    except Exception as e:
-        print(f"Error installing service file: {str(e)}")
-        return
-    
-    # avahiサービスファイルのインストール
-    try:
+        
         os.makedirs('/etc/avahi/services', exist_ok=True)
         with open('/etc/avahi/services/loadreporter.service', 'w') as f:
             f.write(AVAHI_SERVICE)
         print("Avahi service file installed successfully")
+        
+        # サービスの有効化と起動
+        if not run_command(['systemctl', 'daemon-reload'], "Failed to reload systemd"):
+            return
+        print("Systemd daemon reloaded")
+        
+        if not run_command(['systemctl', 'enable', 'loadreporter'], "Failed to enable service"):
+            return
+        print("Service enabled")
+        
+        if not run_command(['systemctl', 'start', 'loadreporter'], "Failed to start service"):
+            return
+        print("Service started")
+        
+        # サービスの状態を確認
+        if not run_command(['systemctl', 'status', 'loadreporter'], "Failed to get service status"):
+            return
+        
+        print("Post-installation completed successfully!")
+        
     except Exception as e:
-        print(f"Error installing avahi service file: {str(e)}")
+        print(f"Error during installation: {str(e)}")
         return
-    
-    # サービスの有効化と起動
-    if not run_command(['systemctl', 'daemon-reload'], "Failed to reload systemd"):
-        return
-    print("Systemd daemon reloaded")
-    
-    if not run_command(['systemctl', 'enable', 'loadreporter'], "Failed to enable service"):
-        return
-    print("Service enabled")
-    
-    if not run_command(['systemctl', 'start', 'loadreporter'], "Failed to start service"):
-        return
-    print("Service started")
-    
-    # サービスの状態を確認
-    if not run_command(['systemctl', 'status', 'loadreporter'], "Failed to get service status"):
-        return
-    
-    print("Post-installation completed successfully!")
 
 # エントリーポイントスクリプトのテンプレート
 ENTRY_POINT_TEMPLATE = """#!/usr/bin/python3
