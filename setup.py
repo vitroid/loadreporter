@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
 setup(
     name='loadreporter',
-    version='0.1.0',
+    version='0.1.1',
     description='計算機負荷をzeroconfで提供するデーモン',
     author='Masakazu Matsumoto',
     author_email='vitroid@gmail.com',
