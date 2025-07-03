@@ -22,9 +22,9 @@ install-from-github:
 install:
 	pip3 install -e .
 	p=`which loadreporter`; echo $$p; sed -e "s!LOADREPORTER_PATH!$$p!" < systemctl/loadreporter.tmpl > systemctl/loadreporter.service
-	install -m 0644 avahi/loadreporter.service /etc/avahi/services/
-	install -m 0644 systemctl/loadreporter.service /etc/systemd/system
-	systemctl enable loadreporter
-	systemctl stop loadreporter
-	systemctl start loadreporter
+	sudo install -m 0644 avahi/loadreporter.service /etc/avahi/services/
+	sudo install -m 0644 systemctl/loadreporter.service /etc/systemd/system
+	sudo systemctl enable loadreporter
+	sudo systemctl stop loadreporter
+	sudo systemctl start loadreporter
 
