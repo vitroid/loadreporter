@@ -19,6 +19,7 @@ install-from-github:
 	@echo "Installation completed!"
 
 # ローカルインストール
+# root権限ではpipが使えなくなったので、必要な部分のみsudoで実行
 install:
 	pip3 install -e .
 	p=`which loadreporter`; echo $$p; sed -e "s!LOADREPORTER_PATH!$$p!" < systemctl/loadreporter.tmpl > systemctl/loadreporter.service
