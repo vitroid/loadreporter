@@ -3,6 +3,7 @@ import os
 import os.path
 import re
 import subprocess
+import socket
 
 import uvicorn
 from fastapi import FastAPI
@@ -10,8 +11,10 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import time
 import numpy
+from loadreporter import __version__
 # import time
 
+import netifaces
 
 # from fastapi.middleware.cors import CORSMiddleware
 # from fastapi_utils.tasks import repeat_every
@@ -30,6 +33,24 @@ def ostype():
     except:
         with open("/etc/system-release") as f:
             return f.readline().strip()
+
+
+def get_ip_address():
+    """
+    netifacesを使って全NICのIPv4アドレスを取得する
+    """
+    ip_addresses = []
+    for iface in netifaces.interfaces():
+        addrs = netifaces.ifaddresses(iface)
+        if netifaces.AF_INET in addrs:
+            for link in addrs[netifaces.AF_INET]:
+                ip = link['addr']
+                if ip != '127.0.0.1':
+                    ip_addresses.append({
+                        "interface": iface,
+                        "ip_address": ip
+                    })
+    return ip_addresses
 
 
 def flops():
@@ -126,6 +147,10 @@ def info():
     output["memory"] = mem_info()
     output["GFlops"] = flops() / 1e9
     output["usage"] = cpu_usage(output["cores"])
+    # IPアドレス情報を追加
+    output["network"] = get_ip_address()
+    output["api"] = __api_version__
+    output["version"] = __version__
     return output
 
 
