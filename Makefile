@@ -29,7 +29,9 @@ install:
 	@echo "Copying package to virtual environment..."
 	sudo mkdir -p /opt/loadreporter/lib/python3.10/site-packages/loadreporter
 	sudo cp -r loadreporter/* /opt/loadreporter/lib/python3.10/site-packages/loadreporter/
-	sudo touch /opt/loadreporter/lib/python3.10/site-packages/loadreporter/__init__.py
+	sudo chmod -R 755 /opt/loadreporter/lib/python3.10/site-packages/loadreporter/
+	@echo "Testing package import..."
+	sudo /opt/loadreporter/bin/python -c "import loadreporter.api; print('Package import successful')"
 	@echo "Creating systemd service file from template..."
 	PYTHON=/opt/loadreporter/bin/python; \
 	WORKDIR=/opt/loadreporter; \
