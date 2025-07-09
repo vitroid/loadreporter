@@ -27,9 +27,10 @@ install:
 	sudo /opt/loadreporter/bin/pip install --upgrade pip
 	sudo /opt/loadreporter/bin/pip install fastapi uvicorn numpy netifaces zeroconf
 	@echo "Copying package to virtual environment..."
-	sudo mkdir -p /opt/loadreporter/lib/python3.10/site-packages/loadreporter
-	sudo cp -r loadreporter/* /opt/loadreporter/lib/python3.10/site-packages/loadreporter/
-	sudo chmod -R 755 /opt/loadreporter/lib/python3.10/site-packages/loadreporter/
+	SITE_PACKAGES=$$(sudo /opt/loadreporter/bin/python -c "import site; print(site.getsitepackages()[0])"); \
+	sudo mkdir -p $$SITE_PACKAGES/loadreporter; \
+	sudo cp -r loadreporter/* $$SITE_PACKAGES/loadreporter/; \
+	sudo chmod -R 755 $$SITE_PACKAGES/loadreporter/
 	@echo "Testing package import..."
 	sudo /opt/loadreporter/bin/python -c "import loadreporter.api; print('Package import successful')"
 	@echo "Creating systemd service file from template..."
