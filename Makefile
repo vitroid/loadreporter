@@ -19,13 +19,30 @@ install-from-github:
 	@echo "Installation completed!"
 
 # ローカルインストール
-# root権限ではpipが使えなくなったので、必要な部分のみsudoで実行
+# 仮想環境を使用してシステム全体にインストール
 install:
-	pip3 install -e .
-	p=`which loadreporter`; echo $$p; sed -e "s!LOADREPORTER_PATH!$$p!" < systemctl/loadreporter.tmpl > systemctl/loadreporter.service
+	@echo "Creating virtual environment..."
+	sudo python3 -m venv /opt/loadreporter
+	@echo "Installing dependencies in virtual environment..."
+	sudo /opt/loadreporter/bin/pip install --upgrade pip
+	sudo /opt/loadreporter/bin/pip install fastapi uvicorn numpy netifaces zeroconf
+	@echo "Copying package to virtual environment..."
+	sudo mkdir -p /opt/loadreporter/lib/python3.10/site-packages/loadreporter
+	sudo cp -r loadreporter/* /opt/loadreporter/lib/python3.10/site-packages/loadreporter/
+	sudo touch /opt/loadreporter/lib/python3.10/site-packages/loadreporter/__init__.py
+	@echo "Creating systemd service file from template..."
+	PYTHON=/opt/loadreporter/bin/python; \
+	WORKDIR=/opt/loadreporter; \
+	sed -e "s!@PYTHON@!$$PYTHON!g" -e "s!@WORKDIR@!$$WORKDIR!g" < systemctl/loadreporter.tmpl > systemctl/loadreporter.service
+	@echo "Installing system files..."
 	sudo install -m 0644 avahi/loadreporter.service /etc/avahi/services/
 	sudo install -m 0644 systemctl/loadreporter.service /etc/systemd/system
+	@echo "Enabling and starting service..."
+	sudo systemctl daemon-reload
 	sudo systemctl enable loadreporter
-	sudo systemctl stop loadreporter
+	sudo systemctl stop loadreporter || true
 	sudo systemctl start loadreporter
+	@echo "Installation completed!"
+	@echo "Service status:"
+	sudo systemctl status loadreporter --no-pager -l
 
